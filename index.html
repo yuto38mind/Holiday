@@ -91,7 +91,7 @@
   scene.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') play(); });
 
   function play(){
-    if (played || !expiredEl.hidden) return; // 期限切れなら再生しない
+    //if (played || !expiredEl.hidden) return; // 期限切れなら再生しない
     played = true;
     cta.remove();
     // 窓 点灯
@@ -119,4 +119,5 @@
 </script>
 </body>
 </html>
+
 
