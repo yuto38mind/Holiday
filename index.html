@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Holiday Message</title>
+<style>
+  :root{--sky1:#0b1020;--sky2:#1a2444;--house:#0f1324;--window-off:#0b1020;--window-on:#ffd54d}
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0}
+  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;background:linear-gradient(var(--sky1),var(--sky2));color:#fff;overflow:hidden}
+  .scene{position:relative;width:100%;height:100%}
+  .stars{position:absolute;inset:0;pointer-events:none;mask-image:linear-gradient(black 70%, transparent 100%)}
+  .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.8}
+  .house{position:absolute;left:50%;bottom:12vh;transform:translateX(-50%);width:min(420px,72vw);height:auto}
+  .house .body{fill:var(--house)}
+  .house .win{fill:var(--window-off);transition:fill 1s}
+  .cta{position:absolute;inset:auto 0 4vh 0;text-align:center;font-weight:600;opacity:.9}
+  .msg{position:absolute;left:50%;top:14vh;transform:translateX(-50%);max-width:min(800px,92vw);font-size:clamp(18px,3.4vw,28px);line-height:1.5;white-space:pre-wrap;text-align:center;opacity:0}
+  .from{margin-top:12px;font-size:.9em;opacity:.85}
+  .expired{position:absolute;inset:0;display:grid;place-items:center;background:#000a;font-size:18px}
+  .shoot{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:0 0 6px #fff}
+  @media (prefers-reduced-motion: reduce){
+    .shoot{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="scene" id="scene" aria-live="polite">
+  <div class="stars" id="stars"></div>
+
+  <!-- SVGの家 -->
+  <svg class="house" viewBox="0 0 600 420" aria-hidden="true">
+    <path class="body" d="M80 220 L300 70 L520 220 L520 390 L80 390 Z"/>
+    <!-- 窓 -->
+    <rect class="win" x="150" y="250" width="60" height="60" rx="8"/>
+    <rect class="win" x="260" y="240" width="80" height="80" rx="10"/>
+    <rect class="win" x="410" y="250" width="60" height="60" rx="8"/>
+    <rect class="win" x="200" y="330" width="70" height="40" rx="6"/>
+    <rect class="win" x="330" y="330" width="70" height="40" rx="6"/>
+    <!-- ドア -->
+    <rect class="body" x="90" y="300" width="60" height="90" rx="6"/>
+  </svg>
+
+  <div class="cta" id="cta">画面をタップすると灯りがともります ✨</div>
+  <div class="msg" id="msg"></div>
+</div>
+
+<div class="expired" id="expired" hidden>このメッセージは期限切れです。</div>
+
+<script>
+  // ====== ここだけ書き換えればOK ======
+  const MESSAGE = '🎉 あけましておめでとう！\n今年もどうぞよろしくお願いします。';
+  const SIGN    = '— K より';        // 署名不要なら空文字 '' に
+  const EXPIRE  = null;              // 例: '2026-01-03' にするとその日23:59:59で期限切れ
+  // ====================================
+
+  // 期限チェック
+  const expiredEl = document.getElementById('expired');
+  if (EXPIRE) {
+    const limit = new Date(EXPIRE).setHours(23,59,59,999);
+    if (Date.now() > limit) expiredEl.hidden = false;
+  }
+
+  // 星
+  const stars = document.getElementById('stars');
+  for(let i=0;i<140;i++){
+    const s=document.createElement('div'); s.className='star';
+    s.style.left = (Math.random()*100)+'%';
+    s.style.top  = (Math.random()*70)+'%';
+    s.style.opacity = 0.5 + Math.random()*0.5;
+    s.style.transform = `scale(${.6+Math.random()*1.4})`;
+    stars.appendChild(s);
+  }
+
+  // メッセージ
+  const msgEl = document.getElementById('msg');
+  const fullText = SIGN ? (MESSAGE + '\n\n' + SIGN) : MESSAGE;
+  function typewriter(el,text,ms=22){
+    let i=0; el.style.opacity=1;
+    const id=setInterval(()=>{ el.textContent=text.slice(0,++i); if(i>=text.length) clearInterval(id); }, ms);
+  }
+
+  // クリックで演出
+  const scene = document.getElementById('scene');
+  const cta = document.getElementById('cta');
+  scene.tabIndex = 0;
+  let played = false;
+  scene.addEventListener('click', play);
+  scene.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') play(); });
+
+  function play(){
+    if (played || !expiredEl.hidden) return; // 期限切れなら再生しない
+    played = true;
+    cta.remove();
+    // 窓 点灯
+    document.querySelectorAll('.win').forEach((w,i)=>{
+      setTimeout(()=> w.style.fill = 'var(--window-on)', 250 + i*220);
+    });
+    // 流れ星
+    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
+      for(let i=0;i<6;i++) setTimeout(shootingStar, 600 + i*500);
+    }
+    // メッセージ表示
+    setTimeout(()=> typewriter(msgEl, fullText, 22), 1200);
+  }
+
+  function shootingStar(){
+    const s=document.createElement('div'); s.className='shoot';
+    const x = Math.random()*window.innerWidth*0.7 + window.innerWidth*0.1;
+    const y = Math.random()*window.innerHeight*0.3 + 40;
+    s.style.left = x+'px'; s.style.top = y+'px';
+    document.body.appendChild(s);
+    const dx = 160 + Math.random()*240, dy = 100 + Math.random()*160;
+    s.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${-dx}px,${dy}px)`,opacity:0}],{duration:1200,fill:'forwards',easing:'ease-out'})
+     .onfinish=()=> s.remove();
+  }
+</script>
+</body>
+</html>
