@@ -86,7 +86,8 @@
     overflow:hidden;
     opacity:0;
     transform: translateX(60px);
-    transition: opacity .9s ease, transform .9s cubic-bezier(.2,.8,.2,1);
+    transition: opacity .9s ease, transform .9s ease;
+    will-change: opacity, transform;
     position:relative;
   }
   .photo.show{
@@ -275,7 +276,7 @@
   const SIGN    = "— K より"; // 不要なら ""
   const TITLE   = "New Year Letter";
   // 写真が出る速度（ms）
-  const PHOTO_DELAY = 900;
+  const PHOTO_DELAY = 2000;
   // 花びら量（端末が重ければ下げる）
   const PETAL_COUNT = 26;
   // ===============================
