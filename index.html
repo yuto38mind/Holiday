@@ -3,85 +3,379 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Holiday Message</title>
+<title>Holiday Letter</title>
 <style>
-  :root{--sky1:#0b1020;--sky2:#1a2444;--house:#0f1324;--window-off:#0b1020;--window-on:#ffd54d}
+  :root{
+    --bg1:#0b1020; --bg2:#1a2444;
+    --card: rgba(10,14,28,.45);
+    --border: rgba(255,255,255,.14);
+    --shadow: 0 18px 50px rgba(0,0,0,.35);
+    --text:#fff;
+  }
   *{box-sizing:border-box}
   html,body{height:100%;margin:0}
-  body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;background:linear-gradient(var(--sky1),var(--sky2));color:#fff;overflow:hidden}
-  .scene{position:relative;width:100%;height:100%}
-  .stars{position:absolute;inset:0;pointer-events:none;mask-image:linear-gradient(black 70%, transparent 100%)}
-  .star{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;opacity:.8}
-  .house{position:absolute;left:50%;bottom:12vh;transform:translateX(-50%);width:min(420px,72vw);height:auto}
-  .house .body{fill:var(--house)}
-  .house .win{fill:var(--window-off);transition:fill 1s}
-  .cta{position:absolute;inset:auto 0 4vh 0;text-align:center;font-weight:600;opacity:.9}
-  .msg{position:absolute;left:50%;top:14vh;transform:translateX(-50%);max-width:min(800px,92vw);font-size:clamp(18px,3.4vw,28px);line-height:1.5;white-space:pre-wrap;text-align:center;opacity:0}
-  .shoot{position:absolute;width:2px;height:2px;background:#fff;border-radius:50%;box-shadow:0 0 6px #fff}
-  @media (prefers-reduced-motion: reduce){ .shoot{display:none} }
+  body{
+    font-family:system-ui,-apple-system,Segoe UI,Roboto,"Hiragino Kaku Gothic ProN","Yu Gothic","Noto Sans JP",sans-serif;
+    background:linear-gradient(var(--bg1),var(--bg2));
+    color:var(--text);
+    overflow:hidden;
+  }
+  .scene{
+    position:relative;
+    width:100%;
+    height:100vh;
+    height:100dvh;
+  }
+
+  /* ===== 桜（花びら） ===== */
+  .petals{
+    position:absolute; inset:0;
+    pointer-events:none;
+    overflow:hidden;
+  }
+  .petal{
+    position:absolute;
+    top:-10vh;
+    width:14px; height:10px;
+    background: radial-gradient(circle at 30% 30%, #ffd1dc 0%, #ffb7c5 35%, #ff9fb2 70%, #ff8aa2 100%);
+    border-radius: 80% 20% 80% 20%;
+    transform: rotate(15deg);
+    opacity:.75;
+    filter: drop-shadow(0 2px 4px rgba(0,0,0,.25));
+    animation:
+      fall var(--fallDur) linear var(--delay) infinite,
+      sway var(--swayDur) ease-in-out var(--delay) infinite,
+      spin var(--spinDur) ease-in-out var(--delay) infinite;
+  }
+  @keyframes fall{
+    from{ transform: translate(var(--x0), -10vh) rotate(0deg); }
+    to  { transform: translate(var(--x1), 110vh) rotate(360deg); }
+  }
+  @keyframes sway{
+    0%,100%{ margin-left: 0 }
+    50%{ margin-left: var(--sway) }
+  }
+  @keyframes spin{
+    0%,100%{ rotate: 10deg }
+    50%{ rotate: -18deg }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .petal{ display:none; }
+  }
+
+  /* ===== 写真シーケンス ===== */
+  .stack{
+    position:absolute;
+    left:50%;
+    top:14vh;
+    transform: translateX(-50%);
+    width:min(920px,92vw);
+    display:flex;
+    gap:14px;
+    justify-content:center;
+    align-items:stretch;
+  }
+  .photo{
+    flex:1;
+    min-width:0;
+    aspect-ratio: 3 / 4;
+    border-radius:18px;
+    background: var(--card);
+    border:1px solid var(--border);
+    box-shadow: var(--shadow);
+    overflow:hidden;
+    opacity:0;
+    transform: translateX(60px);
+    transition: opacity .9s ease, transform .9s cubic-bezier(.2,.8,.2,1);
+    position:relative;
+  }
+  .photo.show{
+    opacity:1;
+    transform: translateX(0);
+  }
+  .photo img{
+    width:100%; height:100%;
+    object-fit: cover;
+    display:block;
+    filter: saturate(1.05) contrast(1.02);
+  }
+  .photo::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(to top, rgba(0,0,0,.28), transparent 50%);
+    pointer-events:none;
+  }
+
+  /* ===== 封筒（手紙） ===== */
+  .letterWrap{
+    position:absolute;
+    left:50%;
+    bottom:10vh;
+    transform: translateX(-50%);
+    width:min(520px,90vw);
+    display:flex;
+    justify-content:center;
+    opacity:0;
+    transform-origin:center;
+    transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1);
+  }
+  .letterWrap.show{
+    opacity:1;
+    transform: translateX(-50%) translateY(0);
+  }
+  .envelope{
+    width:100%;
+    aspect-ratio: 16 / 10;
+    position:relative;
+    cursor:pointer;
+    user-select:none;
+    border-radius:22px;
+    box-shadow: var(--shadow);
+    outline:none;
+  }
+  .env-back{
+    position:absolute; inset:0;
+    background: rgba(255,255,255,.10);
+    border: 1px solid var(--border);
+    border-radius:22px;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+  .env-front{
+    position:absolute; inset:0;
+    border-radius:22px;
+    overflow:hidden;
+  }
+  .env-front:before{
+    content:"";
+    position:absolute; inset:0;
+    background:
+      linear-gradient(135deg, transparent 50%, rgba(255,255,255,.12) 50%) left,
+      linear-gradient(-135deg, transparent 50%, rgba(255,255,255,.12) 50%) right;
+    background-size: 50% 100%;
+    background-repeat:no-repeat;
+    border:1px solid var(--border);
+    border-radius:22px;
+  }
+  .seal{
+    position:absolute;
+    left:50%; top:55%;
+    transform: translate(-50%,-50%);
+    width:64px; height:64px;
+    border-radius:50%;
+    background: radial-gradient(circle at 30% 30%, #ffdee7, #ffb7c5 70%, #ff95ae);
+    border:1px solid rgba(255,255,255,.25);
+    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    display:grid;
+    place-items:center;
+    font-weight:800;
+    letter-spacing:.08em;
+    color:#3a1420;
+  }
+  .hint{
+    position:absolute;
+    left:50%;
+    top:10%;
+    transform:translateX(-50%);
+    font-weight:700;
+    opacity:.92;
+    text-align:center;
+    width:90%;
+  }
+  .hint small{display:block; opacity:.75; font-weight:600; margin-top:.25em}
+
+  /* 開封後の紙 */
+  .paper{
+    position:absolute;
+    left:50%; top:18%;
+    transform: translateX(-50%) translateY(18px);
+    width:90%;
+    height:72%;
+    background: rgba(255,255,255,.92);
+    color:#111;
+    border-radius:16px;
+    box-shadow: 0 18px 40px rgba(0,0,0,.25);
+    padding: 18px 18px;
+    opacity:0;
+    pointer-events:none;
+    transition: opacity .55s ease, transform .55s ease;
+    overflow:auto;
+  }
+  .paper.show{
+    opacity:1;
+    transform: translateX(-50%) translateY(0);
+    pointer-events:auto;
+  }
+  .paper h1{
+    margin:0 0 10px 0;
+    font-size: clamp(18px, 3.8vw, 24px);
+  }
+  .paper .text{
+    font-size: clamp(16px, 3.4vw, 20px);
+    line-height:1.7;
+    white-space:pre-wrap;
+  }
+  .paper .close{
+    position:sticky;
+    bottom:0;
+    margin-top:14px;
+    display:flex;
+    justify-content:center;
+  }
+  .paper button{
+    border:0;
+    padding:10px 14px;
+    border-radius:999px;
+    background:#111;
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  /* focus見た目 */
+  .envelope:focus-visible{
+    outline: 3px solid rgba(255,255,255,.35);
+    outline-offset: 4px;
+  }
 </style>
 </head>
 <body>
-<div class="scene" id="scene" aria-live="polite">
-  <div class="stars" id="stars"></div>
-  <svg class="house" viewBox="0 0 600 420" aria-hidden="true">
-    <path class="body" d="M80 220 L300 70 L520 220 L520 390 L80 390 Z"/>
-    <rect class="win" x="150" y="250" width="60" height="60" rx="8"/>
-    <rect class="win" x="260" y="240" width="80" height="80" rx="10"/>
-    <rect class="win" x="410" y="250" width="60" height="60" rx="8"/>
-    <rect class="win" x="200" y="330" width="70" height="40" rx="6"/>
-    <rect class="win" x="330" y="330" width="70" height="40" rx="6"/>
-    <rect class="body" x="90" y="300" width="60" height="90" rx="6"/>
-  </svg>
-  <div class="cta" id="cta">画面をタップすると灯りがともります ✨</div>
-  <div class="msg" id="msg"></div>
+<div class="scene" id="scene">
+  <div class="petals" id="petals" aria-hidden="true"></div>
+
+  <div class="stack" aria-label="写真スライド">
+    <!-- 画像を /assets に入れてファイル名を合わせてください -->
+    <div class="photo" id="p1"><img src="assets/photo1.jpg" alt="photo 1"></div>
+    <div class="photo" id="p2"><img src="assets/photo2.jpg" alt="photo 2"></div>
+    <div class="photo" id="p3"><img src="assets/photo3.jpg" alt="photo 3"></div>
+  </div>
+
+  <div class="letterWrap" id="letterWrap">
+    <div class="envelope" id="envelope" role="button" tabindex="0" aria-label="手紙を開く">
+      <div class="env-back"></div>
+      <div class="env-front"></div>
+      <div class="seal">OPEN</div>
+      <div class="hint" id="hint">
+        手紙をタップして開いてね
+        <small>Enter / Space でもOK</small>
+      </div>
+
+      <div class="paper" id="paper" aria-live="polite">
+        <h1 id="paperTitle">Message</h1>
+        <div class="text" id="paperText"></div>
+        <div class="close"><button type="button" id="closeBtn">閉じる</button></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 <script>
   // ===== 好きに書き換える場所 =====
-  const MESSAGE = '🎉 あけましておめでとう！\n今年もどうぞよろしくお願いします。';
-  const SIGN    = '— K より'; // 署名不要なら '' に
+  const MESSAGE = "🎉 あけましておめでとう！\n\n今年もどうぞよろしくお願いします。\n健康で良い一年になりますように。";
+  const SIGN    = "— K より"; // 不要なら ""
+  const TITLE   = "New Year Letter";
+  // 写真が出る速度（ms）
+  const PHOTO_DELAY = 900;
+  // 花びら量（端末が重ければ下げる）
+  const PETAL_COUNT = 26;
   // ===============================
 
-  // 星
-  const stars = document.getElementById('stars');
-  for(let i=0;i<140;i++){
-    const s=document.createElement('div'); s.className='star';
-    s.style.left=(Math.random()*100)+'%'; s.style.top=(Math.random()*70)+'%';
-    s.style.opacity=0.5+Math.random()*0.5; s.style.transform=`scale(${.6+Math.random()*1.4})`;
-    stars.appendChild(s);
-  }
-
-  // メッセージ
-  const msgEl=document.getElementById('msg');
-  const fullText = SIGN ? (MESSAGE+'\n\n'+SIGN) : MESSAGE;
-  function typewriter(el,text,ms=22){
-    let i=0; el.style.opacity=1;
-    const id=setInterval(()=>{ el.textContent=text.slice(0,++i); if(i>=text.length) clearInterval(id); }, ms);
-  }
-
-  // 再生
-  const scene=document.getElementById('scene'); const cta=document.getElementById('cta');
-  scene.tabIndex=0; let played=false;
-  scene.addEventListener('click', play);
-  scene.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' ') play(); });
-
-  function play(){
-    if(played) return; played=true; cta.remove();
-    document.querySelectorAll('.win').forEach((w,i)=>{ setTimeout(()=> w.style.fill='var(--window-on)', 250+i*220); });
-    if(!matchMedia('(prefers-reduced-motion: reduce)').matches){
-      for(let i=0;i<6;i++) setTimeout(shootingStar, 600+i*500);
+  // 桜を生成（軽量）
+  const petals = document.getElementById("petals");
+  if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
+    for(let i=0;i<PETAL_COUNT;i++){
+      const p=document.createElement("div");
+      p.className="petal";
+      const x0 = Math.random()*100;
+      const x1 = x0 + (Math.random()*30-15);
+      const sway = (Math.random()*24-12) + "px";
+      p.style.setProperty("--x0", x0+"vw");
+      p.style.setProperty("--x1", x1+"vw");
+      p.style.setProperty("--sway", sway);
+      p.style.setProperty("--fallDur", (10+Math.random()*9)+"s");
+      p.style.setProperty("--swayDur", (2.6+Math.random()*2.4)+"s");
+      p.style.setProperty("--spinDur", (2.8+Math.random()*2.6)+"s");
+      p.style.setProperty("--delay", (-Math.random()*10)+"s");
+      p.style.opacity = (0.45 + Math.random()*0.4).toFixed(2);
+      p.style.transform = `scale(${(0.7+Math.random()*1.2).toFixed(2)})`;
+      petals.appendChild(p);
     }
-    setTimeout(()=> typewriter(msgEl, fullText, 22), 1200);
   }
-  function shootingStar(){
-    const s=document.createElement('div'); s.className='shoot';
-    const x=Math.random()*innerWidth*0.7+innerWidth*0.1;
-    const y=Math.random()*innerHeight*0.3+40;
-    s.style.left=x+'px'; s.style.top=y+'px'; document.body.appendChild(s);
-    const dx=160+Math.random()*240, dy=100+Math.random()*160;
-    s.animate([{transform:'translate(0,0)',opacity:1},{transform:`translate(${-dx}px,${dy}px)`,opacity:0}],{duration:1200,fill:'forwards',easing:'ease-out'}).onfinish=()=>s.remove();
+
+  // 写真を右から順に表示（p1→p2→p3）
+  const p1=document.getElementById("p1");
+  const p2=document.getElementById("p2");
+  const p3=document.getElementById("p3");
+  const letterWrap=document.getElementById("letterWrap");
+
+  // 初期は非表示
+  [p1,p2,p3].forEach(el=>el.classList.remove("show"));
+
+  // 表示シーケンス開始
+  setTimeout(()=>p1.classList.add("show"), 200);
+  setTimeout(()=>p2.classList.add("show"), 200 + PHOTO_DELAY);
+  setTimeout(()=>p3.classList.add("show"), 200 + PHOTO_DELAY*2);
+  setTimeout(()=>letterWrap.classList.add("show"), 200 + PHOTO_DELAY*3);
+
+  // 手紙：開封
+  const envelope=document.getElementById("envelope");
+  const paper=document.getElementById("paper");
+  const paperText=document.getElementById("paperText");
+  const paperTitle=document.getElementById("paperTitle");
+  const closeBtn=document.getElementById("closeBtn");
+  const hint=document.getElementById("hint");
+
+  paperTitle.textContent = TITLE;
+
+  const fullText = SIGN ? (MESSAGE + "\n\n" + SIGN) : MESSAGE;
+
+  function typewriter(el, text, ms=18){
+    el.textContent="";
+    let i=0;
+    const id=setInterval(()=>{
+      el.textContent = text.slice(0, ++i);
+      if(i>=text.length) clearInterval(id);
+    }, ms);
+    return id;
   }
+
+  let opened=false;
+  let typingId=null;
+
+  function openLetter(){
+    if(opened) return;
+    opened=true;
+    hint.style.display="none";
+    paper.classList.add("show");
+    typingId = typewriter(paperText, fullText, 18);
+  }
+
+  function closeLetter(){
+    opened=false;
+    if(typingId) clearInterval(typingId);
+    paper.classList.remove("show");
+    hint.style.display="";
+    paperText.textContent="";
+  }
+
+  envelope.addEventListener("click", (e)=>{
+    // 紙のスクロール等で閉じないように、紙上クリックは無視
+    if(e.target.closest("#paper")) return;
+    if(!opened) openLetter();
+  });
+  envelope.addEventListener("keydown", (e)=>{
+    if(e.key==="Enter" || e.key===" "){
+      e.preventDefault();
+      if(!opened) openLetter();
+    }
+    if(e.key==="Escape" && opened){
+      closeLetter();
+    }
+  });
+  closeBtn.addEventListener("click", (e)=>{
+    e.stopPropagation();
+    closeLetter();
+  });
 </script>
 </body>
 </html>
