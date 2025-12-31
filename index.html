@@ -85,14 +85,18 @@
     box-shadow: var(--shadow);
     overflow:hidden;
     opacity:0;
-    transform: translateX(60px);
+    transform: translateY(12px);
     transition: opacity .9s ease, transform .9s ease;
     will-change: opacity, transform;
     position:relative;
   }
   .photo.show{
     opacity:1;
-    transform: translateX(0);
+    transform: translateY(0);
+  }
+  .photo.hide{
+    opacity:0;
+    transform: translateY(16px);
   }
   .photo img{
     width:100%; height:100%;
@@ -100,6 +104,32 @@
     display:block;
     filter: saturate(1.05) contrast(1.02);
   }
+
+  .photo .toko{
+    position:absolute;
+    right: 14px;
+    bottom: 14px;
+    padding: 8px 12px;
+    border-radius: 999px;
+    font-weight: 800;
+    letter-spacing: .06em;
+    background: rgba(0,0,0,.35);
+    border: 1px solid rgba(255,255,255,.18);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    opacity: 0;
+    transform: translateY(6px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .photo.show .toko{
+    opacity: 1;
+    transform: translateY(0);
+  }
+  .photo.hide .toko{
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
   .photo::after{
     content:"";
     position:absolute; inset:0;
@@ -233,7 +263,6 @@
     cursor:pointer;
   }
 
-  /* focus見た目 */
   .envelope:focus-visible{
     outline: 3px solid rgba(255,255,255,.35);
     outline-offset: 4px;
@@ -245,10 +274,20 @@
   <div class="petals" id="petals" aria-hidden="true"></div>
 
   <div class="stack" aria-label="写真スライド">
-    <!-- 画像を /assets に入れてファイル名を合わせてください -->
-    <div class="photo" id="p1"><img src="assets/photo1.jpg" alt="photo 1"></div>
-    <div class="photo" id="p2"><img src="assets/photo2.jpg" alt="photo 2"></div>
-    <div class="photo" id="p3"><img src="assets/photo3.jpg" alt="photo 3"></div>
+    <div class="photo" id="p1">
+      <img src="assets/photo1.jpg" alt="photo 1">
+      <div class="toko">トコトコ</div>
+    </div>
+
+    <div class="photo" id="p2">
+      <img src="assets/photo2.jpg" alt="photo 2">
+      <div class="toko">トコトコ</div>
+    </div>
+
+    <div class="photo" id="p3">
+      <img src="assets/photo3.jpg" alt="photo 3">
+      <div class="toko">トコトコ</div>
+    </div>
   </div>
 
   <div class="letterWrap" id="letterWrap">
@@ -275,10 +314,9 @@
   const MESSAGE = "🎉 あけましておめでとう！\n\n今年もどうぞよろしくお願いします。\n健康で良い一年になりますように。";
   const SIGN    = "— K より"; // 不要なら ""
   const TITLE   = "New Year Letter";
-  // 写真が出る速度（ms）
-  const PHOTO_DELAY = 2000;
-  // 花びら量（端末が重ければ下げる）
-  const PETAL_COUNT = 26;
+  const PHOTO_DELAY = 2000;   // 写真が出る間隔（ms）
+  const VISIBLE_MS  = 2200;   // 表示している時間（ms）
+  const PETAL_COUNT = 26;     // 花びら量（端末が重ければ下げる）
   // ===============================
 
   // 桜を生成（軽量）
@@ -303,77 +341,92 @@
     }
   }
 
-  // 写真を右から順に表示（p1→p2→p3）
-  const p1=document.getElementById("p1");
-  const p2=document.getElementById("p2");
-  const p3=document.getElementById("p3");
-  const letterWrap=document.getElementById("letterWrap");
+  // 写真：要素取得
+  const p1 = document.getElementById("p1");
+  const p2 = document.getElementById("p2");
+  const p3 = document.getElementById("p3");
+  const letterWrap = document.getElementById("letterWrap");
 
-  // 初期は非表示
-  [p1,p2,p3].forEach(el=>el.classList.remove("show"));
+  // 初期化
+  [p1,p2,p3].forEach(el => el.classList.remove("show","hide"));
 
-  // 表示シーケンス開始
-  setTimeout(()=>p1.classList.add("show"), 200);
-  setTimeout(()=>p2.classList.add("show"), 200 + PHOTO_DELAY);
-  setTimeout(()=>p3.classList.add("show"), 200 + PHOTO_DELAY*2);
-  setTimeout(()=>letterWrap.classList.add("show"), 200 + PHOTO_DELAY*3);
+  function showThenHide(el, showDelay, visibleMs = VISIBLE_MS){
+    setTimeout(() => {
+      el.classList.add("show");
+      el.classList.remove("hide");
+    }, showDelay);
+
+    setTimeout(() => {
+      el.classList.add("hide");
+      el.classList.remove("show");
+    }, showDelay + visibleMs);
+  }
+
+  // 右から順に表示：p3 → p2 → p1
+  showThenHide(p3, 200);
+  showThenHide(p2, 200 + PHOTO_DELAY);
+  showThenHide(p1, 200 + PHOTO_DELAY*2);
+
+  // 手紙は最後に出す
+  setTimeout(() => letterWrap.classList.add("show"), 200 + PHOTO_DELAY*3);
 
   // 手紙：開封
-  const envelope=document.getElementById("envelope");
-  const paper=document.getElementById("paper");
-  const paperText=document.getElementById("paperText");
-  const paperTitle=document.getElementById("paperTitle");
-  const closeBtn=document.getElementById("closeBtn");
-  const hint=document.getElementById("hint");
+  const envelope = document.getElementById("envelope");
+  const paper = document.getElementById("paper");
+  const paperText = document.getElementById("paperText");
+  const paperTitle = document.getElementById("paperTitle");
+  const closeBtn = document.getElementById("closeBtn");
+  const hint = document.getElementById("hint");
 
   paperTitle.textContent = TITLE;
 
   const fullText = SIGN ? (MESSAGE + "\n\n" + SIGN) : MESSAGE;
 
   function typewriter(el, text, ms=18){
-    el.textContent="";
-    let i=0;
-    const id=setInterval(()=>{
+    el.textContent = "";
+    let i = 0;
+    const id = setInterval(() => {
       el.textContent = text.slice(0, ++i);
-      if(i>=text.length) clearInterval(id);
+      if(i >= text.length) clearInterval(id);
     }, ms);
     return id;
   }
 
-  let opened=false;
-  let typingId=null;
+  let opened = false;
+  let typingId = null;
 
   function openLetter(){
     if(opened) return;
-    opened=true;
-    hint.style.display="none";
+    opened = true;
+    hint.style.display = "none";
     paper.classList.add("show");
     typingId = typewriter(paperText, fullText, 18);
   }
 
   function closeLetter(){
-    opened=false;
+    opened = false;
     if(typingId) clearInterval(typingId);
     paper.classList.remove("show");
-    hint.style.display="";
-    paperText.textContent="";
+    hint.style.display = "";
+    paperText.textContent = "";
   }
 
-  envelope.addEventListener("click", (e)=>{
-    // 紙のスクロール等で閉じないように、紙上クリックは無視
-    if(e.target.closest("#paper")) return;
+  envelope.addEventListener("click", (e) => {
+    if(e.target.closest("#paper")) return; // 紙上クリックは無視
     if(!opened) openLetter();
   });
-  envelope.addEventListener("keydown", (e)=>{
-    if(e.key==="Enter" || e.key===" "){
+
+  envelope.addEventListener("keydown", (e) => {
+    if(e.key === "Enter" || e.key === " "){
       e.preventDefault();
       if(!opened) openLetter();
     }
-    if(e.key==="Escape" && opened){
+    if(e.key === "Escape" && opened){
       closeLetter();
     }
   });
-  closeBtn.addEventListener("click", (e)=>{
+
+  closeBtn.addEventListener("click", (e) => {
     e.stopPropagation();
     closeLetter();
   });
