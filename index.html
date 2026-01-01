@@ -27,7 +27,7 @@
     height:100dvh;
   }
 
-  /* ===== 桜（花びら） ===== */
+  /* ===== 桜（花びら）：まっすぐ落とす ===== */
   .petals{
     position:absolute; inset:0;
     pointer-events:none;
@@ -39,21 +39,16 @@
     width:14px; height:10px;
     background: radial-gradient(circle at 30% 30%, #ffd1dc 0%, #ffb7c5 35%, #ff9fb2 70%, #ff8aa2 100%);
     border-radius: 80% 20% 80% 20%;
-    transform: rotate(15deg);
     opacity:.75;
     filter: drop-shadow(0 2px 4px rgba(0,0,0,.25));
+    /* 横に揺らさず、縦に落ちる＋軽い回転だけ */
     animation:
-      fall var(--fallDur) linear var(--delay) infinite,
-      sway var(--swayDur) ease-in-out var(--delay) infinite,
+      fallStraight var(--fallDur) linear var(--delay) infinite,
       spin var(--spinDur) ease-in-out var(--delay) infinite;
   }
-  @keyframes fall{
-    from{ transform: translate(var(--x0), -10vh) rotate(0deg); }
-    to  { transform: translate(var(--x1), 110vh) rotate(360deg); }
-  }
-  @keyframes sway{
-    0%,100%{ margin-left: 0 }
-    50%{ margin-left: var(--sway) }
+  @keyframes fallStraight{
+    from{ transform: translateY(-10vh); }
+    to  { transform: translateY(110vh); }
   }
   @keyframes spin{
     0%,100%{ rotate: 10deg }
@@ -83,32 +78,45 @@
     background: var(--card);
     border:1px solid var(--border);
     box-shadow: var(--shadow);
-    overflow:hidden;
+    overflow:visible; /* 枠外ラベルを出すので visible */
     opacity:0;
     transform: translateY(12px);
     transition: opacity .9s ease, transform .9s ease;
     will-change: opacity, transform;
     position:relative;
   }
-  .photo.show{
-    opacity:1;
-    transform: translateY(0);
+  .photo.show{ opacity:1; transform: translateY(0); }
+  .photo.hide{ opacity:0; transform: translateY(16px); }
+
+  .photo .frame{
+    position:relative;
+    width:100%; height:100%;
+    border-radius:18px;
+    overflow:hidden; /* 画像は枠内に収める */
+    background: var(--card);
+    border:1px solid var(--border);
+    box-shadow: var(--shadow);
   }
-  .photo.hide{
-    opacity:0;
-    transform: translateY(16px);
-  }
+
   .photo img{
     width:100%; height:100%;
     object-fit: cover;
     display:block;
     filter: saturate(1.05) contrast(1.02);
   }
+  .photo .frame::after{
+    content:"";
+    position:absolute; inset:0;
+    background: linear-gradient(to top, rgba(0,0,0,.28), transparent 50%);
+    pointer-events:none;
+  }
 
+  /* ===== トコトコ：写真の外側（枠外）に表示 ===== */
   .photo .toko{
     position:absolute;
-    right: 14px;
-    bottom: 14px;
+    left: 50%;
+    top: calc(100% + 10px);          /* 枠の外側に出す */
+    transform: translateX(-50%) translateY(6px);
     padding: 8px 12px;
     border-radius: 999px;
     font-weight: 800;
@@ -118,26 +126,19 @@
     backdrop-filter: blur(8px);
     -webkit-backdrop-filter: blur(8px);
     opacity: 0;
-    transform: translateY(6px);
     transition: opacity .6s ease, transform .6s ease;
+    white-space: nowrap;
   }
   .photo.show .toko{
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(-50%) translateY(0);
   }
   .photo.hide .toko{
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateX(-50%) translateY(8px);
   }
 
-  .photo::after{
-    content:"";
-    position:absolute; inset:0;
-    background: linear-gradient(to top, rgba(0,0,0,.28), transparent 50%);
-    pointer-events:none;
-  }
-
-  /* ===== 封筒（手紙） ===== */
+  /* ===== 封筒（手紙）：白い封筒 ===== */
   .letterWrap{
     position:absolute;
     left:50%;
@@ -164,13 +165,12 @@
     box-shadow: var(--shadow);
     outline:none;
   }
+
   .env-back{
     position:absolute; inset:0;
-    background: rgba(255,255,255,.10);
-    border: 1px solid var(--border);
+    background: rgba(255,255,255,.88);
+    border: 1px solid rgba(0,0,0,.10);
     border-radius:22px;
-    backdrop-filter: blur(10px);
-    -webkit-backdrop-filter: blur(10px);
   }
   .env-front{
     position:absolute; inset:0;
@@ -181,11 +181,11 @@
     content:"";
     position:absolute; inset:0;
     background:
-      linear-gradient(135deg, transparent 50%, rgba(255,255,255,.12) 50%) left,
-      linear-gradient(-135deg, transparent 50%, rgba(255,255,255,.12) 50%) right;
+      linear-gradient(135deg, transparent 50%, rgba(0,0,0,.06) 50%) left,
+      linear-gradient(-135deg, transparent 50%, rgba(0,0,0,.06) 50%) right;
     background-size: 50% 100%;
     background-repeat:no-repeat;
-    border:1px solid var(--border);
+    border:1px solid rgba(0,0,0,.10);
     border-radius:22px;
   }
   .seal{
@@ -194,78 +194,122 @@
     transform: translate(-50%,-50%);
     width:64px; height:64px;
     border-radius:50%;
-    background: radial-gradient(circle at 30% 30%, #ffdee7, #ffb7c5 70%, #ff95ae);
-    border:1px solid rgba(255,255,255,.25);
-    box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    background: radial-gradient(circle at 30% 30%, #ffffff, #f2f2f2 70%, #e7e7e7);
+    border:1px solid rgba(0,0,0,.10);
+    box-shadow: 0 10px 25px rgba(0,0,0,.20);
     display:grid;
     place-items:center;
-    font-weight:800;
+    font-weight:900;
     letter-spacing:.08em;
-    color:#3a1420;
+    color:#111;
   }
   .hint{
     position:absolute;
     left:50%;
     top:10%;
     transform:translateX(-50%);
-    font-weight:700;
-    opacity:.92;
+    font-weight:800;
+    color:#111;
+    opacity:.88;
     text-align:center;
     width:90%;
+    text-shadow:none;
   }
-  .hint small{display:block; opacity:.75; font-weight:600; margin-top:.25em}
+  .hint small{display:block; opacity:.70; font-weight:700; margin-top:.25em}
 
-  /* 開封後の紙 */
-  .paper{
-    position:absolute;
-    left:50%; top:18%;
-    transform: translateX(-50%) translateY(18px);
-    width:90%;
-    height:72%;
-    background: rgba(255,255,255,.92);
-    color:#111;
-    border-radius:16px;
-    box-shadow: 0 18px 40px rgba(0,0,0,.25);
-    padding: 18px 18px;
+  .envelope:focus-visible{
+    outline: 3px solid rgba(255,255,255,.55);
+    outline-offset: 4px;
+  }
+
+  /* ===== 開封後：16:9 の白い新画面（オーバーレイ） ===== */
+  .overlay{
+    position:fixed;
+    inset:0;
+    display:grid;
+    place-items:center;
+    background: rgba(0,0,0,.35);
     opacity:0;
     pointer-events:none;
-    transition: opacity .55s ease, transform .55s ease;
-    overflow:auto;
+    transition: opacity .35s ease;
   }
-  .paper.show{
+  .overlay.show{
     opacity:1;
-    transform: translateX(-50%) translateY(0);
     pointer-events:auto;
   }
-  .paper h1{
-    margin:0 0 10px 0;
-    font-size: clamp(18px, 3.8vw, 24px);
+  .paper169{
+    width:min(92vw, 980px);
+    aspect-ratio: 16 / 9;
+    background:#fff;
+    color:#111;
+    border-radius:20px;
+    box-shadow: 0 28px 80px rgba(0,0,0,.35);
+    position:relative;
+    overflow:hidden;
+    transform: scale(.96);
+    opacity:0;
+    transition: transform .45s ease, opacity .45s ease;
   }
-  .paper .text{
-    font-size: clamp(16px, 3.4vw, 20px);
-    line-height:1.7;
+  .overlay.show .paper169{
+    transform: scale(1);
+    opacity:1;
+  }
+
+  /* 開封時のエフェクト（シンプルなキラッ） */
+  .sparkle{
+    position:absolute;
+    inset:-20%;
+    background:
+      radial-gradient(circle at 20% 30%, rgba(255,255,255,.85), transparent 38%),
+      radial-gradient(circle at 70% 60%, rgba(255,255,255,.65), transparent 42%),
+      radial-gradient(circle at 45% 25%, rgba(255,255,255,.55), transparent 40%);
+    opacity:0;
+    transform: scale(.95);
+    pointer-events:none;
+  }
+  .overlay.show .sparkle{
+    animation: sparkleIn .55s ease forwards;
+  }
+  @keyframes sparkleIn{
+    0%{opacity:0; transform:scale(.95)}
+    40%{opacity:.85}
+    100%{opacity:0; transform:scale(1.05)}
+  }
+
+  .paperInner{
+    position:absolute;
+    inset:0;
+    padding: 26px 26px;
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+  }
+  .paperTitle{
+    margin:0;
+    font-size: clamp(18px, 2.6vw, 26px);
+    letter-spacing:.02em;
+  }
+  .paperText{
+    flex:1;
+    font-size: clamp(16px, 2.2vw, 20px);
+    line-height:1.75;
     white-space:pre-wrap;
+    overflow:auto;
+    padding-right:6px;
   }
-  .paper .close{
-    position:sticky;
-    bottom:0;
-    margin-top:14px;
+  .paperActions{
     display:flex;
     justify-content:center;
+    gap:10px;
   }
-  .paper button{
+  .paperActions button{
     border:0;
     padding:10px 14px;
     border-radius:999px;
     background:#111;
     color:#fff;
-    font-weight:700;
+    font-weight:800;
     cursor:pointer;
-  }
-
-  .envelope:focus-visible{
-    outline: 3px solid rgba(255,255,255,.35);
-    outline-offset: 4px;
   }
 </style>
 </head>
@@ -275,17 +319,23 @@
 
   <div class="stack" aria-label="写真スライド">
     <div class="photo" id="p1">
-      <img src="assets/photo1.jpg" alt="photo 1">
+      <div class="frame">
+        <img src="assets/photo1.jpg" alt="photo 1">
+      </div>
       <div class="toko">トコトコ</div>
     </div>
 
     <div class="photo" id="p2">
-      <img src="assets/photo2.jpg" alt="photo 2">
+      <div class="frame">
+        <img src="assets/photo2.jpg" alt="photo 2">
+      </div>
       <div class="toko">トコトコ</div>
     </div>
 
     <div class="photo" id="p3">
-      <img src="assets/photo3.jpg" alt="photo 3">
+      <div class="frame">
+        <img src="assets/photo3.jpg" alt="photo 3">
+      </div>
       <div class="toko">トコトコ</div>
     </div>
   </div>
@@ -299,11 +349,19 @@
         手紙をタップして開いてね
         <small>Enter / Space でもOK</small>
       </div>
+    </div>
+  </div>
+</div>
 
-      <div class="paper" id="paper" aria-live="polite">
-        <h1 id="paperTitle">Message</h1>
-        <div class="text" id="paperText"></div>
-        <div class="close"><button type="button" id="closeBtn">閉じる</button></div>
+<!-- 開封後の白い16:9画面 -->
+<div class="overlay" id="overlay" aria-hidden="true">
+  <div class="paper169" role="dialog" aria-label="メッセージ">
+    <div class="sparkle"></div>
+    <div class="paperInner">
+      <h1 class="paperTitle" id="paperTitle">Message</h1>
+      <div class="paperText" id="paperText"></div>
+      <div class="paperActions">
+        <button type="button" id="closeOverlay">閉じる</button>
       </div>
     </div>
   </div>
@@ -319,22 +377,17 @@
   const PETAL_COUNT = 26;     // 花びら量（端末が重ければ下げる）
   // ===============================
 
-  // 桜を生成（軽量）
+  // 桜を生成（まっすぐ落下）
   const petals = document.getElementById("petals");
   if(!matchMedia("(prefers-reduced-motion: reduce)").matches){
     for(let i=0;i<PETAL_COUNT;i++){
       const p=document.createElement("div");
       p.className="petal";
-      const x0 = Math.random()*100;
-      const x1 = x0 + (Math.random()*30-15);
-      const sway = (Math.random()*24-12) + "px";
-      p.style.setProperty("--x0", x0+"vw");
-      p.style.setProperty("--x1", x1+"vw");
-      p.style.setProperty("--sway", sway);
-      p.style.setProperty("--fallDur", (10+Math.random()*9)+"s");
-      p.style.setProperty("--swayDur", (2.6+Math.random()*2.4)+"s");
-      p.style.setProperty("--spinDur", (2.8+Math.random()*2.6)+"s");
-      p.style.setProperty("--delay", (-Math.random()*10)+"s");
+      // 位置は横だけランダム。落ちは縦のみ。
+      p.style.left = (Math.random()*100) + "vw";
+      p.style.setProperty("--fallDur", (8 + Math.random()*10) + "s");
+      p.style.setProperty("--spinDur", (2.8 + Math.random()*2.6) + "s");
+      p.style.setProperty("--delay", (-Math.random()*10) + "s");
       p.style.opacity = (0.45 + Math.random()*0.4).toFixed(2);
       p.style.transform = `scale(${(0.7+Math.random()*1.2).toFixed(2)})`;
       petals.appendChild(p);
@@ -370,16 +423,15 @@
   // 手紙は最後に出す
   setTimeout(() => letterWrap.classList.add("show"), 200 + PHOTO_DELAY*3);
 
-  // 手紙：開封
+  // ===== 開封後のオーバーレイ（白い16:9） =====
+  const overlay = document.getElementById("overlay");
   const envelope = document.getElementById("envelope");
-  const paper = document.getElementById("paper");
   const paperText = document.getElementById("paperText");
   const paperTitle = document.getElementById("paperTitle");
-  const closeBtn = document.getElementById("closeBtn");
+  const closeOverlay = document.getElementById("closeOverlay");
   const hint = document.getElementById("hint");
 
   paperTitle.textContent = TITLE;
-
   const fullText = SIGN ? (MESSAGE + "\n\n" + SIGN) : MESSAGE;
 
   function typewriter(el, text, ms=18){
@@ -399,36 +451,40 @@
     if(opened) return;
     opened = true;
     hint.style.display = "none";
-    paper.classList.add("show");
+    overlay.classList.add("show");
+    overlay.setAttribute("aria-hidden","false");
     typingId = typewriter(paperText, fullText, 18);
   }
 
   function closeLetter(){
     opened = false;
     if(typingId) clearInterval(typingId);
-    paper.classList.remove("show");
+    overlay.classList.remove("show");
+    overlay.setAttribute("aria-hidden","true");
     hint.style.display = "";
     paperText.textContent = "";
   }
 
-  envelope.addEventListener("click", (e) => {
-    if(e.target.closest("#paper")) return; // 紙上クリックは無視
-    if(!opened) openLetter();
-  });
-
+  envelope.addEventListener("click", () => openLetter());
   envelope.addEventListener("keydown", (e) => {
     if(e.key === "Enter" || e.key === " "){
       e.preventDefault();
-      if(!opened) openLetter();
-    }
-    if(e.key === "Escape" && opened){
-      closeLetter();
+      openLetter();
     }
   });
 
-  closeBtn.addEventListener("click", (e) => {
+  closeOverlay.addEventListener("click", (e) => {
     e.stopPropagation();
     closeLetter();
+  });
+
+  overlay.addEventListener("click", (e) => {
+    // 背景クリックで閉じる（紙の上は除外）
+    if(e.target === overlay) closeLetter();
+  });
+
+  document.addEventListener("keydown", (e) => {
+    if(e.key === "Escape" && opened) closeLetter();
   });
 </script>
 </body>
