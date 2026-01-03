@@ -197,8 +197,12 @@
     left:0; top:0;
     width:100%;
     height:40%;
-    background: rgba(0,0,0,.06);
-
+    background: linear-gradient(
+    to bottom,
+    rgba(0,0,0,.10) 0%,
+    rgba(0,0,0,.06) 55%,
+    rgba(0,0,0,0) 100%
+    );
     /* ▼ 谷型（三角が下に開く） */
     clip-path: polygon(0 100%, 100% 100%, 50% 0);
 
@@ -517,6 +521,7 @@
 </script>
 </body>
 </html>
+
 
 
 
