@@ -110,12 +110,7 @@
     display:block;
   }
 
-  .photo .frame::after{
-    content:"";
-    position:absolute; inset:0;
-    background: linear-gradient(to top, rgba(0,0,0,.28), transparent 50%);
-    pointer-events:none;
-  }
+  .photo .frame::after{ display:none; }
 
   /* ===== トコトコ：写真の外側（枠外）に表示 ===== */
   .photo .toko{
@@ -528,6 +523,7 @@
 </script>
 </body>
 </html>
+
 
 
 
