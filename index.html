@@ -114,26 +114,26 @@
 
   /* ===== トコトコ：写真の外側（枠外）に表示 ===== */
   .photo .toko{
-    position:absolute;
-    left: 50%;
-    top: calc(100% + 10px);          /* 枠の外側に出す */
-    transform: translateX(-50%) translateY(6px);
-    padding: 8px 12px;
-    border-radius: 999px;
-    font-weight: 800;
-    letter-spacing: .06em;
-    /* 背景系を削除 */
-    /* background: rgba(0,0,0,.35); */
-    /* border: 1px solid rgba(255,255,255,.18); */
-    /* backdrop-filter: blur(8px); */
-    /*  -webkit-backdrop-filter: blur(8px); */
-    opacity: 0;
-    transition: opacity .6s ease, transform .6s ease;
-    white-space: nowrap;
+  position: absolute;
+  left: calc(100% + 12px);
+  top: 50%;
+  transform: translateY(-50%);
+
+  font-weight: 800;
+  letter-spacing: .06em;
+  white-space: nowrap;
+
+  opacity: 0;
+
+  transition:
+    opacity .6s ease,
+    transform .6s ease;
+
+  transition-delay: .4s;  /* ← ここ。0.4秒後に出る */
   }
+
   .photo.show .toko{
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
   }
   .photo.hide .toko{
     opacity: 0;
@@ -523,6 +523,7 @@
 </script>
 </body>
 </html>
+
 
 
 
