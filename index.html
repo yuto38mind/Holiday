@@ -79,36 +79,37 @@
     justify-content:center;
     align-items:stretch;
   }
-  .photo{
-    flex:1;
-    min-width:0;
-    aspect-ratio: 3 / 4;
-    border-radius:18px;
-    background: var(--card);
-    border:1px solid var(--border);
-    box-shadow: var(--shadow);
-    overflow:visible; /* 枠外ラベルを出すので visible */
-    opacity:0;
-    transform: translateY(12px);
-    transition: opacity .9s ease, transform .9s ease;
-    will-change: opacity, transform;
-    position:relative;
+ .photo{
+  flex:1;
+  min-width:0;
+  aspect-ratio: 3 / 4;
+
+  background: none;
+  border: 0;
+  box-shadow: none;
+
+  overflow: visible; /* トコトコ用 */
+  position: relative;
+
+  opacity: 0;
+  transform: translateY(12px);
+  transition: opacity .9s ease, transform .9s ease;
   }
+
   .photo.show{ opacity:1; transform: translateY(0); }
   .photo.hide{ opacity:0; transform: translateY(16px); }
 
   .photo .frame{
-  position: relative;
-  width: 100%;
-  height: 100%;
+    overflow: visible;
   }
 
-  .photo img{
-    width:100%; height:100%;
+  .photo .frame img{
+    width:100%;
+    height:100%;
     object-fit: cover;
     display:block;
-    filter: saturate(1.05) contrast(1.02);
   }
+
   .photo .frame::after{
     content:"";
     position:absolute; inset:0;
@@ -527,6 +528,7 @@
 </script>
 </body>
 </html>
+
 
 
 
