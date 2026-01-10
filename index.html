@@ -103,7 +103,11 @@
   }
 
   .photo.show{ opacity:1; transform: translateY(0); }
-  .photo.hide{ opacity:0; transform: translateY(16px); }
+  .photo.hide{ 
+    opacity:0;
+    transform: translateY(16px);
+    transition-duration: .5s;
+  }
 
   .photo .frame{
     overflow: visible;
@@ -325,7 +329,8 @@
     font-size: clamp(16px, 2.2vw, 20px);
     line-height:1.75;
     white-space:pre-wrap;
-    overflow:auto;
+    overflow: hidden;     
+    max-height: none;
     padding-right:6px;
   }
   .paperActions{
@@ -368,6 +373,13 @@
         <img src="assets/photo3.jpg" alt="photo 3">
       </div>
       <div class="toko">トコトコ</div>
+    </div>
+
+    <div class="photo" id="p4">
+      <div class="frame">
+        <img src="assets/photo4.jpg" alt="photo 4">
+      </div>
+      <div class="toko">手紙をもってきたよ！</div>
     </div>
   </div>
 
@@ -429,10 +441,12 @@
   const p1 = document.getElementById("p1");
   const p2 = document.getElementById("p2");
   const p3 = document.getElementById("p3");
+  const p4 = document.getElementById("p4");
+
   const letterWrap = document.getElementById("letterWrap");
 
   // 初期化
-  [p1,p2,p3].forEach(el => el.classList.remove("show","hide"));
+  [p1,p2,p3,p4].forEach(el => el.classList.remove("show","hide"));
 
   function showThenHide(el, showDelay, visibleMs = VISIBLE_MS){
     setTimeout(() => {
@@ -454,6 +468,7 @@
   // 手紙は最後に出す
   setTimeout(() => {
   letterWrap.classList.add("show");
+  showThenHide(p4, 200);
 
   // 背景を切り替える
   document.body.classList.add("night");
@@ -529,6 +544,7 @@
 </script>
 </body>
 </html>
+
 
 
 
