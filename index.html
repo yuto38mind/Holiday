@@ -165,6 +165,9 @@
     opacity:0;
     transform-origin:center;
     transition: opacity .8s ease, transform .8s cubic-bezier(.2,.8,.2,1);
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
   }
   .letterWrap.show{
     opacity:1;
@@ -175,6 +178,7 @@
     width: min(220px, 44vw); /* 好みで調整 */
     aspect-ratio: 3 / 4;
     transform: translateY(12px); /* 既存アニメの初期値と整合 */
+    z-index: 2;
   }
   .envelope{
     width:100%;
@@ -185,6 +189,7 @@
     border-radius:22px;
     box-shadow: var(--shadow);
     outline:none;
+    z-index: 1;
   }
 
   .env-back{
@@ -551,6 +556,7 @@
 </script>
 </body>
 </html>
+
 
 
 
